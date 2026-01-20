@@ -155,7 +155,6 @@ async def on_voice_state_update(member, before, after):
 
         channel = guild.get_channel(VC_LOG_CHANNEL_ID)
         if channel:
-            await channel.send(summary)
 
 # ---------------------------
 # LIVE UPDATE LOOP
@@ -176,4 +175,18 @@ async def on_ready():
 # ---------------------------
 # RUN BOT
 # ---------------------------
+from flask import Flask
+from threading import Thread
+
+app = Flask("")
+
+@app.route("/")
+def home():
+    return "I'm alive"
+
+def run():
+    app.run(host="0.0.0.0", port=8080)
+
+# Run the web server in a separate thread
+Thread(target=run).start()
 bot.run(TOKEN)
