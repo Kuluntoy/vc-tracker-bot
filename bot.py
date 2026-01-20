@@ -1,5 +1,5 @@
 # ---------------------------
-# VC Tracker Bot - Live + Final Summary in One Message (Safe Token)
+# VC Tracker Bot - Single Message (Live + Final Summary)
 # ---------------------------
 
 import discord
@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 # ---------------------------
 # LOAD ENVIRONMENT VARIABLES
 # ---------------------------
-load_dotenv()  # Reads your .env file
+load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # ---------------------------
@@ -43,8 +43,8 @@ vc_session_active = False
 vc_session_start = None
 vc_message = None
 vc_users_in_call = set()
-vc_start_times = {}  # { user_id: datetime }
-bot.individual_times = {}  # { user_id: total_seconds }
+vc_start_times = {}          # { user_id: join_datetime }
+bot.individual_times = {}    # { user_id: total_seconds }
 
 # ---------------------------
 # HELPER FUNCTIONS
@@ -57,6 +57,7 @@ def log(message):
         f.write(f"{datetime.datetime.now()}: {message}\n")
 
 async def update_live_message(guild):
+    """Update the single live message with current individual times."""
     global vc_message
     if not vc_message:
         return
@@ -111,7 +112,7 @@ async def on_voice_state_update(member, before, after):
             bot.individual_times[member.id] = bot.individual_times.get(member.id, 0) + duration
             log(f"{member.display_name} left VC after {format_duration(duration)}")
 
-    # Start session
+    # START session
     if not vc_session_active and vc_users_in_call:
         vc_session_active = True
         vc_session_start = datetime.datetime.utcnow()
@@ -129,15 +130,16 @@ async def on_voice_state_update(member, before, after):
             )
             vc_message = await channel.send(content)
 
-    # End session
+    # END session (everyone left)
     elif vc_session_active and not vc_users_in_call:
         vc_session_active = False
         session_end = datetime.datetime.utcnow()
         overall_duration = (session_end - vc_session_start).total_seconds()
+
         my_member = guild.get_member(MY_ID)
         gf_member = guild.get_member(GF_ID)
 
-        summary = (
+        final_content = (
             f"{EMOJIS[MY_ID]} {my_member.display_name}: ⏱ {format_duration(bot.individual_times.get(MY_ID, 0))}\n"
             f"{EMOJIS[GF_ID]} {gf_member.display_name}: ⏱ {format_duration(bot.individual_times.get(GF_ID, 0))}\n"
             f"Session started: {vc_session_start.strftime('%d-%m-%Y %H:%M:%S UTC')}\n"
@@ -148,13 +150,10 @@ async def on_voice_state_update(member, before, after):
         log(f"VC session ended. Total duration: {format_duration(overall_duration)}")
         if vc_message:
             try:
-                await vc_message.edit(content=summary)
+                await vc_message.edit(content=final_content)
             except discord.NotFound:
                 pass
-            vc_message = None
-
-        channel = guild.get_channel(VC_LOG_CHANNEL_ID)
-        if channel:
+            vc_message = None  # so the next session will create a new message
 
 # ---------------------------
 # LIVE UPDATE LOOP
@@ -173,7 +172,7 @@ async def on_ready():
     log("Bot started and ready.")
 
 # ---------------------------
-# RUN BOT
+# RUN BOT (with simple Flask web server for uptime)
 # ---------------------------
 from flask import Flask
 from threading import Thread
@@ -187,6 +186,5 @@ def home():
 def run():
     app.run(host="0.0.0.0", port=8080)
 
-# Run the web server in a separate thread
 Thread(target=run).start()
 bot.run(TOKEN)
