@@ -185,6 +185,12 @@ def home():
 
 def run():
     app.run(host="0.0.0.0", port=8080)
+    
+print("STEP 1: FILE STARTED")
 
 Thread(target=run).start()
+
+print("STEP 2: AFTER FLASK THREAD")
+
+print("STEP 3: BEFORE BOT.RUN")
 bot.run(TOKEN)
