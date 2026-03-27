@@ -174,12 +174,10 @@ async def on_ready():
 # ---------------------------
 # RUN BOT (with simple Flask web server for uptime)
 # ---------------------------
-    
-print("STEP 1: FILE STARTED")
-
-print("STEP 2: AFTER FLASK THREAD")
-
-print("STEP 3: BEFORE BOT.RUN")
-
-print("STARTING BOT...")
+if not TOKEN:
+    print("ERROR: Discord token not set!")
+    exit(1)
+else:
+    print("TOKEN found, starting bot...")
+    bot.run(TOKEN)
 bot.run(TOKEN)
