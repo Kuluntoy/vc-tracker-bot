@@ -174,23 +174,12 @@ async def on_ready():
 # ---------------------------
 # RUN BOT (with simple Flask web server for uptime)
 # ---------------------------
-from flask import Flask
-from threading import Thread
-
-app = Flask("")
-
-@app.route("/")
-def home():
-    return "I'm alive"
-
-def run():
-    app.run(host="0.0.0.0", port=8080)
     
 print("STEP 1: FILE STARTED")
-
-Thread(target=run).start()
 
 print("STEP 2: AFTER FLASK THREAD")
 
 print("STEP 3: BEFORE BOT.RUN")
+
+print("STARTING BOT...")
 bot.run(TOKEN)
