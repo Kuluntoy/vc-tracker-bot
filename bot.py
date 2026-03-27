@@ -1,7 +1,6 @@
 # ---------------------------
 # VC Tracker Bot - Single Message (Live + Final Summary)
 # ---------------------------
-# Add this to the top of your bot.py
 from flask import Flask
 from threading import Thread
 
@@ -14,6 +13,7 @@ def home():
 def run():
     app.run(host='0.0.0.0', port=8080)
 
+# Start the web server in a separate thread
 Thread(target=run).start()
 
 import discord
@@ -193,5 +193,4 @@ if not TOKEN:
     exit(1)
 else:
     print("TOKEN found, starting bot...")
-    bot.run(TOKEN)
 bot.run(TOKEN)
